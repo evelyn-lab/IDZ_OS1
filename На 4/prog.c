@@ -93,23 +93,28 @@ int main(int argc, char *argv[]) {
         printf("Usage: %s input_file output_file\n", argv[0]);
         return 1;
     }
+    //Создание неименованных каналов
     int pipe1[2];
     int pipe2[2];
     pid_t pid1, pid2, pid3;
+    
     if (pipe(pipe1) == -1 || pipe(pipe2) == -1) {
         printf("Error: could not create pipes.\n");
         return 1;
     }
     pid1 = fork();
+    //Разветвляем первый дочерний процесс для чтения из входного файла и записи в 1 канал
     if (pid1 == 0) {
         child1(argv[1], pipe1);
         exit(0);
     }
+     //Разветвляем второй дочерний процесс для чтения из 1 канала и записи во 2 канал
     pid2 = fork();
     if (pid2 == 0) {
         child2(pipe1, pipe2);
         exit(0);
     }
+    //Разветвляем третий дочерний процесс для чтения из 2 канала и записи в выходной файл
     pid3 = fork();
     if (pid3 == 0) {
         child3(argv[2], pipe2);
